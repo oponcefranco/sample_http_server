@@ -32,7 +32,7 @@ func main() {
 
 	router := http.NewServeMux()
 	router.Handle("/", index())
-	router.Handle("/health", healthz())
+	router.Handle("/health", health())
 
 	nextRequestID := func() string {
 		return fmt.Sprintf("%d", time.Now().UnixNano())
