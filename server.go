@@ -69,7 +69,7 @@ func main() {
 	logger.Println("Server is ready to handle requests at", listenAddr)
 	atomic.StoreInt32(&healthy, 1)
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		logger.Fatalf("Could not listen on %s: %v\n", listenAddr, err)
+		logger.Fatalf("ERROR: Could not listen on %s: %v\n", listenAddr, err)
 	}
 
 	<-done
@@ -85,16 +85,18 @@ func index() http.Handler {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintln(w, "Hello, World!")
+		fmt.Fprintln(w, "Index Handler StatusOk")
 	})
 }
 
 func health() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if atomic.LoadInt32(&healthy) == 1 {
+			// Status: No Content
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
+		// Status: Service Unavailable
 		w.WriteHeader(http.StatusServiceUnavailable)
 	})
 }
