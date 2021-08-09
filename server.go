@@ -52,6 +52,7 @@ func main() {
 	signal.Notify(quit, os.Interrupt)
 
 	go func() {
+		// Keyboard command to stop server
 		<-quit
 		logger.Println("Server is shutting down...")
 		atomic.StoreInt32(&healthy, 0)
@@ -85,7 +86,7 @@ func index() http.Handler {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintln(w, "Index Handler StatusOk")
+		fmt.Fprintln(w, "Server is running (StatusOK)")
 	})
 }
 
