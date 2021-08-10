@@ -85,6 +85,7 @@ func index() http.Handler {
 		}
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
+		// HTTP Status: initial status
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintln(w, "Server is running (StatusOK)")
 	})
@@ -93,11 +94,11 @@ func index() http.Handler {
 func health() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if atomic.LoadInt32(&healthy) == 1 {
-			// Status: No Content
+			// HTTP Status: No Content
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
-		// Status: Service Unavailable
+		// HTTP Status: Service Unavailable
 		w.WriteHeader(http.StatusServiceUnavailable)
 	})
 }
@@ -106,8 +107,8 @@ func logging(logger *log.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			defer func() {
-				requestID, ok := r.Context().Value(requestIDKey).(string)
-				if !ok {
+				requestID, statusOK := r.Context().Value(requestIDKey).(string)
+				if !statusOK {
 					requestID = "unknown"
 				}
 				logger.Println(requestID, r.Method, r.URL.Path, r.RemoteAddr, r.UserAgent())
