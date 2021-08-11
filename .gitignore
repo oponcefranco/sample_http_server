@@ -16,3 +16,6 @@
 
 # Goland specific files
 .idea/
+
+# Macintosh specific files
+.DS_Store
