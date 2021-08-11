@@ -14,8 +14,11 @@ import (
 var listenAddr string
 
 func updateFile(w http.ResponseWriter, r *http.Request) {
-	file, handler, err := r.FormFile("file")
+	// constructor.io looks for:
+	// r.FormFile("items")  or r.FormFile("variations")
+	file, handler, err := r.FormFile("variations")
 	fileName := r.FormValue("file_name")
+
 	if err != nil {
 		panic(err)
 	}
@@ -32,7 +35,6 @@ func updateFile(w http.ResponseWriter, r *http.Request) {
 	defer func(f *os.File) {
 		err := f.Close()
 		if err != nil {
-
 		}
 	}(f)
 	_, _ = io.WriteString(w, "File "+fileName+" Uploaded successfully")
