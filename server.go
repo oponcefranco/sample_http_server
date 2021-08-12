@@ -13,7 +13,7 @@ import (
 
 var listenAddr string
 
-func updateFile(w http.ResponseWriter, r *http.Request) {
+func patchUpdateCsvFile(w http.ResponseWriter, r *http.Request) {
 	// constructor.io looks for:
 	// r.FormFile("items")  or r.FormFile("variations")
 	file, handler, err := r.FormFile("variations")
@@ -27,7 +27,7 @@ func updateFile(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 		}
 	}(file)
-
+	//csv file permission: read & write (0666)
 	f, err := os.OpenFile(handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		panic(err)
@@ -41,26 +41,24 @@ func updateFile(w http.ResponseWriter, r *http.Request) {
 	_, _ = io.Copy(f, file)
 }
 
-func home(w http.ResponseWriter, r *http.Request) {
-	_, _ = fmt.Fprintf(w, "Welcome home!")
+func getHome(w http.ResponseWriter, r *http.Request) {
+	_, _ = fmt.Fprintf(w, "Welcome getHome!")
 }
 
 func main() {
 	flag.StringVar(&listenAddr, "listen-addr", ":8080", "server listen address")
 	flag.Parse()
 	logger := log.New(os.Stdout, "http: ", log.LstdFlags)
-	logger.Println("Server is starting...")
+	logger.Println("Server is starting (port:8080)...")
 
 	router := mux.NewRouter().StrictSlash(true)
 	catalog := router.PathPrefix("/v1/catalog").Subrouter()
 
-	catalog.Path("").Methods(http.MethodGet).HandlerFunc(home)
-	catalog.Path("").Methods(http.MethodPost).HandlerFunc(updateFile)
-	catalog.Path("").Methods(http.MethodPatch).HandlerFunc(updateFile)
+	catalog.Path("").Methods(http.MethodGet).HandlerFunc(getHome)
+	catalog.Path("").Methods(http.MethodPatch).HandlerFunc(patchUpdateCsvFile)
 
-	router.HandleFunc("/", home).Methods("GET")
-	router.HandleFunc("/file", updateFile).Methods("POST")
-	router.HandleFunc("/file", updateFile).Methods("PATCH")
+	router.HandleFunc("/", getHome).Methods("GET")
+	router.HandleFunc("/file", patchUpdateCsvFile).Methods("PATCH")
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
